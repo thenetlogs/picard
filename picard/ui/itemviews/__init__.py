@@ -152,15 +152,29 @@ class MainPanel(QtWidgets.QSplitter):
         self.tagger.album_added.connect(self._album_container.check_state)
         self.tagger.album_removed.connect(self._album_container.check_state)
 
-        # Create a layout for each view to include the filter box
-        for view, tree_container in (
-            (self._file_view, self._file_container),
-            (self._album_view, self._album_container),
-        ):
+        # Create a layout for each view to include the pane header and filter box
+        pane_configs = [
+            (self._file_view, self._file_container, "Unmatched Files"),
+            (self._album_view, self._album_container, "Matched Albums"),
+        ]
+        for view, tree_container, header_text in pane_configs:
             container = QtWidgets.QWidget(self)
             layout = QtWidgets.QVBoxLayout(container)
             layout.setContentsMargins(0, 0, 0, 0)
             layout.setSpacing(0)
+
+            # Add persistent pane header label
+            header = QtWidgets.QLabel(_(header_text))
+            header.setObjectName("pane_header")
+            header.setStyleSheet(
+                "QLabel#pane_header {"
+                "  font-weight: bold;"
+                "  padding: 4px 8px;"
+                "  background-color: palette(alternate-base);"
+                "  border-bottom: 1px solid palette(mid);"
+                "}"
+            )
+            layout.addWidget(header)
 
             # Create and add filter box
             filter_box = view.setup_filter_box()
