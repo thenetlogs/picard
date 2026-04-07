@@ -132,12 +132,12 @@ class MainPanel(QtWidgets.QSplitter):
         # File view: has_content when unclustered files or clusters exist
         # (FileTreeView always has 2 permanent top-level items, so we check
         # their children rather than topLevelItemCount)
-        file_has_content = lambda: (
-            self._file_view.unmatched_files.childCount() > 0
-            or self._file_view.clusters.childCount() > 0
-        )
+        def file_has_content():
+            return self._file_view.unmatched_files.childCount() > 0 or self._file_view.clusters.childCount() > 0
+
         # Album view: has_content when at least one album is loaded
-        album_has_content = lambda: self._album_view.topLevelItemCount() > 0
+        def album_has_content():
+            return self._album_view.topLevelItemCount() > 0
 
         self._file_container = TreeContainer(self._file_view, file_empty, file_has_content)
         self._album_container = TreeContainer(self._album_view, album_empty, album_has_content)

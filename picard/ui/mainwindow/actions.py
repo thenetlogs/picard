@@ -184,12 +184,14 @@ def _create_close_window_action(parent):
 def _create_save_action(parent):
     action = QtGui.QAction(icontheme.lookup('document-save'), _("&Save"), parent)
     action.setStatusTip(_("Save selected files"))
-    action.setToolTip(_(
-        "<b>Save</b> &nbsp; <i>Ctrl+S</i><br><br>"
-        "Writes the proposed tag changes to your files. This "
-        "modifies the actual audio files on disk. Review changes "
-        "in the right pane before saving."
-    ))
+    action.setToolTip(
+        _(
+            "<b>Save</b> &nbsp; <i>Ctrl+S</i><br><br>"
+            "Writes the proposed tag changes to your files. This "
+            "modifies the actual audio files on disk. Review changes "
+            "in the right pane before saving."
+        )
+    )
     # TR: Keyboard shortcut for "Save"
     action.setShortcut(QtGui.QKeySequence.StandardKey.Save)
     action.setEnabled(False)
@@ -212,12 +214,14 @@ def _create_trash_action(parent):
 def _create_submit_acoustid_action(parent):
     action = QtGui.QAction(icontheme.lookup('acoustid-fingerprinter'), _("S&ubmit Fingerprints"), parent)
     action.setStatusTip(_("Submit audio fingerprints to AcoustID"))
-    action.setToolTip(_(
-        "<b>Submit Fingerprints</b><br><br>"
-        "Submits audio fingerprints to the AcoustID database. "
-        "This helps improve identification for other users. "
-        "Does NOT save or modify your tags — use Save for that."
-    ))
+    action.setToolTip(
+        _(
+            "<b>Submit Fingerprints</b><br><br>"
+            "Submits audio fingerprints to the AcoustID database. "
+            "This helps improve identification for other users. "
+            "Does NOT save or modify your tags — use Save for that."
+        )
+    )
     action.setEnabled(False)
     action.triggered.connect(parent._on_submit_acoustid)
     return action
@@ -246,12 +250,14 @@ def _create_remove_action(parent):
 def _create_browser_lookup_action(parent):
     action = QtGui.QAction(icontheme.lookup('lookup-musicbrainz'), _("Open on &Website"), parent)
     action.setStatusTip(_("Open selected item on MusicBrainz website"))
-    action.setToolTip(_(
-        "<b>Open on Website</b> &nbsp; <i>Ctrl+Shift+L</i><br><br>"
-        "Opens the MusicBrainz website in your browser to search for "
-        "the selected item. Useful for manual lookup or editing "
-        "metadata on the website."
-    ))
+    action.setToolTip(
+        _(
+            "<b>Open on Website</b> &nbsp; <i>Ctrl+Shift+L</i><br><br>"
+            "Opens the MusicBrainz website in your browser to search for "
+            "the selected item. Useful for manual lookup or editing "
+            "metadata on the website."
+        )
+    )
     action.setEnabled(False)
     # TR: Keyboard shortcut for "Lookup in Browser"
     action.setShortcut(QtGui.QKeySequence(_("Ctrl+Shift+L")))
@@ -436,12 +442,14 @@ def _create_analyze_action(parent):
     action.setStatusTip(
         _("Use AcoustID audio fingerprint to identify the files by the actual music, even if they have no metadata")
     )
-    action.setToolTip(_(
-        "<b>Scan</b> &nbsp; <i>Ctrl+Y</i><br><br>"
-        "Identifies tracks using audio fingerprinting (AcoustID). "
-        "Use when files have no tags or Lookup didn't find results. "
-        "Takes longer but works with any audio file."
-    ))
+    action.setToolTip(
+        _(
+            "<b>Scan</b> &nbsp; <i>Ctrl+Y</i><br><br>"
+            "Identifies tracks using audio fingerprinting (AcoustID). "
+            "Use when files have no tags or Lookup didn't find results. "
+            "Takes longer but works with any audio file."
+        )
+    )
     action.setEnabled(False)
     # TR: Keyboard shortcut for "Analyze"
     action.setShortcut(QtGui.QKeySequence(_("Ctrl+Y")))
@@ -465,12 +473,14 @@ def _create_generate_fingerprints_action(parent):
 def _create_cluster_action(parent):
     action = QtGui.QAction(icontheme.lookup('picard-cluster'), _("Group by &Album"), parent)
     action.setStatusTip(_("Group unmatched files into album clusters"))
-    action.setToolTip(_(
-        "<b>Group by Album</b> &nbsp; <i>Ctrl+U</i><br><br>"
-        "Groups unmatched files into album clusters based on existing "
-        "tags. Use this after adding files. Files with similar "
-        "album/artist tags will be grouped together."
-    ))
+    action.setToolTip(
+        _(
+            "<b>Group by Album</b> &nbsp; <i>Ctrl+U</i><br><br>"
+            "Groups unmatched files into album clusters based on existing "
+            "tags. Use this after adding files. Files with similar "
+            "album/artist tags will be grouped together."
+        )
+    )
     action.setEnabled(False)
     # TR: Keyboard shortcut for "Cluster"
     action.setShortcut(QtGui.QKeySequence(_("Ctrl+U")))
@@ -482,12 +492,14 @@ def _create_cluster_action(parent):
 def _create_autotag_action(parent):
     action = QtGui.QAction(icontheme.lookup('picard-auto-tag'), _("&Lookup"), parent)
     action.setStatusTip(_("Lookup selected items in MusicBrainz"))
-    action.setToolTip(_(
-        "<b>Lookup</b> &nbsp; <i>Ctrl+L</i><br><br>"
-        "Searches the MusicBrainz database using existing metadata "
-        "(artist, album, track name). Works best when files already "
-        "have some tags. Results appear in the right pane."
-    ))
+    action.setToolTip(
+        _(
+            "<b>Lookup</b> &nbsp; <i>Ctrl+L</i><br><br>"
+            "Searches the MusicBrainz database using existing metadata "
+            "(artist, album, track name). Works best when files already "
+            "have some tags. Results appear in the right pane."
+        )
+    )
     action.setEnabled(False)
     # TR: Keyboard shortcut for "Lookup"
     action.setShortcut(QtGui.QKeySequence(_("Ctrl+L")))
@@ -499,11 +511,13 @@ def _create_autotag_action(parent):
 def _create_view_info_action(parent):
     action = QtGui.QAction(icontheme.lookup('picard-edit-tags'), _("&Track Details…"), parent)
     action.setStatusTip(_("Show detailed information about selected files"))
-    action.setToolTip(_(
-        "<b>Track Details</b> &nbsp; <i>Ctrl+I</i><br><br>"
-        "Shows detailed metadata for the selected track, including "
-        "original tags, matched tags, and file information."
-    ))
+    action.setToolTip(
+        _(
+            "<b>Track Details</b> &nbsp; <i>Ctrl+I</i><br><br>"
+            "Shows detailed metadata for the selected track, including "
+            "original tags, matched tags, and file information."
+        )
+    )
     action.setEnabled(False)
     # TR: Keyboard shortcut for "Info"
     action.setShortcut(QtGui.QKeySequence(_("Ctrl+I")))
