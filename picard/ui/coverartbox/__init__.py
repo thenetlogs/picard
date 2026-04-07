@@ -109,6 +109,19 @@ class CoverArtBox(QtWidgets.QGroupBox):
         self.show_details_shortcut = QtGui.QShortcut(
             QtGui.QKeySequence(_("Ctrl+Shift+I")), self, self.show_cover_art_info
         )
+        # Translators: shown in cover art box when no file or album is selected
+        self._no_selection_label = QtWidgets.QLabel(
+            _("Select a file or album to see cover art"),
+        )
+        self._no_selection_label.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        self._no_selection_label.setWordWrap(True)
+        palette = self._no_selection_label.palette()
+        color = palette.color(QtGui.QPalette.ColorRole.PlaceholderText)
+        self._no_selection_label.setStyleSheet(f"color: {color.name()};")
+        self.layout.addWidget(self._no_selection_label)
+
         self.layout.addWidget(self.cover_art_label)
         self.layout.addWidget(self.cover_art)
         self.layout.addWidget(self.cover_art_info_label)
@@ -121,6 +134,8 @@ class CoverArtBox(QtWidgets.QGroupBox):
         self.orig_cover_art.setHidden(True)
         self.show_details_button.setHidden(True)
         self.show_details_button.clicked.connect(self.show_cover_art_info)
+        # Initially no item selected — show placeholder label, hide cover art widgets
+        self._set_no_selection(True)
 
     def show_cover_art_info(self):
         self.tagger.window.view_info(default_tab=1)
@@ -182,14 +197,22 @@ class CoverArtBox(QtWidgets.QGroupBox):
         if not item.can_show_coverart:
             self.cover_art.set_metadata(None)
             self.orig_cover_art.set_metadata(None)
+            self._set_no_selection(True)
             return
 
+        self._set_no_selection(False)
         if self.item and hasattr(self.item, 'metadata_images_changed'):
             self.item.metadata_images_changed.disconnect(self.update_metadata)
         self.item = item
         if hasattr(self.item, 'metadata_images_changed'):
             self.item.metadata_images_changed.connect(self.update_metadata)
         self.update_metadata()
+
+    def _set_no_selection(self, no_selection):
+        self._no_selection_label.setVisible(no_selection)
+        self.cover_art.setVisible(not no_selection)
+        self.cover_art_label.setVisible(not no_selection)
+        self.cover_art_info_label.setVisible(not no_selection)
 
     def update_metadata(self):
         if not self.item:

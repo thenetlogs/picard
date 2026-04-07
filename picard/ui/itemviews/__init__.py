@@ -80,6 +80,8 @@ from picard.ui.itemviews.columns import (
     FILEVIEW_COLUMNS,
 )
 from picard.ui.itemviews.custom_columns import DelegateColumn
+from picard.ui.widgets.emptystate import EmptyStateWidget
+from picard.ui.widgets.treecontainer import TreeContainer
 
 
 def get_match_color(similarity, basecolor):
@@ -99,16 +101,62 @@ class MainPanel(QtWidgets.QSplitter):
         self.setChildrenCollapsible(False)
         self.window = window
         self.create_icons()
-        self._views = [
-            FileTreeView(FILEVIEW_COLUMNS, window, parent=self),
-            AlbumTreeView(ALBUMVIEW_COLUMNS, window, parent=self),
-        ]
+        self._file_view = FileTreeView(FILEVIEW_COLUMNS, window, parent=None)
+        self._album_view = AlbumTreeView(ALBUMVIEW_COLUMNS, window, parent=None)
+        self._views = [self._file_view, self._album_view]
         self._selected_view = self._views[0]
         self._ignore_selection_changes = False
         self._sort_enabled = None  # None at start, bool once set_sorting is called
 
+        # Create empty state widgets for each view
+        # Translators: shown in empty left panel when no files are loaded
+        file_empty = EmptyStateWidget(
+            _("Drag files or folders here"),
+            icon_name='folder',
+            # Translators: description shown below title in empty left panel
+            description=_("Supported: MP3, FLAC, OGG, M4A, WAV, and more"),
+            # Translators: button label in empty left panel CTA
+            cta_text=_("Add Files"),
+            accept_drops=True,
+        )
+        # Translators: shown in empty right panel when no albums found yet
+        album_empty = EmptyStateWidget(
+            _("No albums found yet"),
+            icon_name='media-optical',
+            # Translators: description shown below title in empty right panel
+            description=_("Add files first, then click Identify"),
+            # Translators: button label in empty right panel CTA
+            cta_text=_("Identify"),
+        )
+
+        # File view: has_content when unclustered files or clusters exist
+        # (FileTreeView always has 2 permanent top-level items, so we check
+        # their children rather than topLevelItemCount)
+        file_has_content = lambda: (
+            self._file_view.unmatched_files.childCount() > 0
+            or self._file_view.clusters.childCount() > 0
+        )
+        # Album view: has_content when at least one album is loaded
+        album_has_content = lambda: self._album_view.topLevelItemCount() > 0
+
+        self._file_container = TreeContainer(self._file_view, file_empty, file_has_content)
+        self._album_container = TreeContainer(self._album_view, album_empty, album_has_content)
+
+        # Connect CTA buttons
+        file_empty.cta_clicked.connect(window.add_files)
+        file_empty.files_dropped.connect(self._on_files_dropped)
+        album_empty.cta_clicked.connect(self._identify_action)
+
+        # Connect tagger signals to update empty state
+        self.tagger.tagger_stats_changed.connect(self._file_container.check_state)
+        self.tagger.album_added.connect(self._album_container.check_state)
+        self.tagger.album_removed.connect(self._album_container.check_state)
+
         # Create a layout for each view to include the filter box
-        for view in self._views:
+        for view, tree_container in (
+            (self._file_view, self._file_container),
+            (self._album_view, self._album_container),
+        ):
             container = QtWidgets.QWidget(self)
             layout = QtWidgets.QVBoxLayout(container)
             layout.setContentsMargins(0, 0, 0, 0)
@@ -118,8 +166,8 @@ class MainPanel(QtWidgets.QSplitter):
             filter_box = view.setup_filter_box()
             layout.addWidget(filter_box)
 
-            # Add view
-            layout.addWidget(view)
+            # Add TreeContainer (empty state + tree view) instead of bare view
+            layout.addWidget(tree_container)
 
             # Add the container to the splitter
             self.addWidget(container)
@@ -157,6 +205,24 @@ class MainPanel(QtWidgets.QSplitter):
                 File.State.ERROR: interface_colors.get_qcolor('entity_error'),
             },
         )
+
+    def _on_files_dropped(self, paths):
+        """Handle files dropped onto the file-view empty state."""
+        tagger = QtCore.QCoreApplication.instance()
+        tagger.add_paths(paths)
+
+    def _identify_action(self):
+        """CTA action for the album empty state.
+
+        Calls cluster() by default.  When doc 05 (Smart Identify) is
+        implemented, this can be replaced by smart_identify() without
+        modifying the empty state code.
+        """
+        window = self.window
+        if hasattr(window, 'smart_identify'):
+            window.smart_identify()
+        else:
+            window.cluster()
 
     def set_processing(self, processing=True):
         self._ignore_selection_changes = processing

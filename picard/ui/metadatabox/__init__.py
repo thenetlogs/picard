@@ -217,6 +217,21 @@ class MetadataBox(QtWidgets.QTableWidget):
         self._single_track_album = False
         self.ignore_updates = IgnoreUpdatesContext(on_exit=self.update)
 
+        # Empty-state label shown over the viewport when nothing is selected
+        # Translators: shown when no file or track is selected in the metadata panel
+        self._empty_label = QtWidgets.QLabel(
+            _("Select a file or track above to see its metadata"),
+            parent=self.viewport(),
+        )
+        self._empty_label.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignCenter
+        )
+        self._empty_label.setWordWrap(True)
+        palette = self._empty_label.palette()
+        color = palette.color(QtGui.QPalette.ColorRole.PlaceholderText)
+        self._empty_label.setStyleSheet(f"color: {color.name()};")
+        self._empty_label.show()
+
         self.mimedata_helper = MimeDataHelper()
         self.mimedata_helper.register(
             self.MIMETYPE_PICARD_TAGS,
@@ -826,8 +841,10 @@ class MetadataBox(QtWidgets.QTableWidget):
 
         if self.tag_diff is None:
             self.setRowCount(0)
+            self._show_empty_label(True)
             return
 
+        self._show_empty_label(False)
         self.setRowCount(len(self.tag_diff.tag_names))
 
         readonly_item_flags = QtCore.Qt.ItemFlag.ItemIsSelectable | QtCore.Qt.ItemFlag.ItemIsEnabled
@@ -891,6 +908,22 @@ class MetadataBox(QtWidgets.QTableWidget):
         item.setFont(font)
 
     @restore_method
+    def _show_empty_label(self, visible):
+        self._empty_label.setVisible(visible)
+        if visible:
+            self._position_empty_label()
+
+    def _position_empty_label(self):
+        vp = self.viewport()
+        self._empty_label.setGeometry(
+            0, 0, vp.width(), vp.height()
+        )
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if self._empty_label.isVisible():
+            self._position_empty_label()
+
     def restore_state(self):
         config = get_config()
         state = config.persist['metadatabox_header_state']
