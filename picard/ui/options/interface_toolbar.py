@@ -85,7 +85,7 @@ class InterfaceToolbarOptionsPage(OptionsPage):
             'document-open',
         ),
         MainAction.CLUSTER: ToolbarButtonDesc(
-            N_("Cluster"),
+            N_("Group by Album"),
             'picard-cluster',
         ),
         MainAction.AUTOTAG: ToolbarButtonDesc(
@@ -97,7 +97,7 @@ class InterfaceToolbarOptionsPage(OptionsPage):
             'picard-analyze',
         ),
         MainAction.BROWSER_LOOKUP: ToolbarButtonDesc(
-            N_("Lookup in Browser"),
+            N_("Open on Website"),
             'lookup-musicbrainz',
         ),
         MainAction.SAVE: ToolbarButtonDesc(
@@ -105,7 +105,7 @@ class InterfaceToolbarOptionsPage(OptionsPage):
             'document-save',
         ),
         MainAction.VIEW_INFO: ToolbarButtonDesc(
-            N_("Info"),
+            N_("Track Details"),
             'picard-edit-tags',
         ),
         MainAction.REMOVE: ToolbarButtonDesc(
@@ -117,7 +117,7 @@ class InterfaceToolbarOptionsPage(OptionsPage):
             QtWidgets.QStyle.StandardPixmap.SP_TrashIcon,
         ),
         MainAction.SUBMIT_ACOUSTID: ToolbarButtonDesc(
-            N_("Submit AcoustIDs"),
+            N_("Submit Fingerprints"),
             'acoustid-fingerprinter',
         ),
         MainAction.DISCID_FROM_TAGS: ToolbarButtonDesc(

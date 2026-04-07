@@ -154,8 +154,8 @@ class MainPanel(QtWidgets.QSplitter):
 
         # Create a layout for each view to include the pane header and filter box
         pane_configs = [
-            (self._file_view, self._file_container, "Unmatched Files"),
-            (self._album_view, self._album_container, "Matched Albums"),
+            (self._file_view, self._file_container, N_("Unmatched Files")),
+            (self._album_view, self._album_container, N_("Matched Albums")),
         ]
         for view, tree_container, header_text in pane_configs:
             container = QtWidgets.QWidget(self)

@@ -259,7 +259,7 @@ def _create_browser_lookup_action(parent):
         )
     )
     action.setEnabled(False)
-    # TR: Keyboard shortcut for "Lookup in Browser"
+    # TR: Keyboard shortcut for "Open on Website"
     action.setShortcut(QtGui.QKeySequence(_("Ctrl+Shift+L")))
     action.triggered.connect(parent.browser_lookup)
     return action
@@ -519,7 +519,7 @@ def _create_view_info_action(parent):
         )
     )
     action.setEnabled(False)
-    # TR: Keyboard shortcut for "Info"
+    # TR: Keyboard shortcut for "Track Details"
     action.setShortcut(QtGui.QKeySequence(_("Ctrl+I")))
     action.triggered.connect(parent.view_info)
     return action
