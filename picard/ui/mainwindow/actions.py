@@ -210,10 +210,10 @@ def _create_trash_action(parent):
 
 @add_action(MainAction.SUBMIT_ACOUSTID)
 def _create_submit_acoustid_action(parent):
-    action = QtGui.QAction(icontheme.lookup('acoustid-fingerprinter'), _("S&ubmit AcoustIDs"), parent)
-    action.setStatusTip(_("Submit acoustic fingerprints"))
+    action = QtGui.QAction(icontheme.lookup('acoustid-fingerprinter'), _("Submit &Fingerprints"), parent)
+    action.setStatusTip(_("Submit audio fingerprints to AcoustID"))
     action.setToolTip(_(
-        "<b>Submit AcoustIDs</b><br><br>"
+        "<b>Submit Fingerprints</b><br><br>"
         "Submits audio fingerprints to the AcoustID database. "
         "This helps improve identification for other users. "
         "Does NOT save or modify your tags — use Save for that."
@@ -244,10 +244,10 @@ def _create_remove_action(parent):
 
 @add_action(MainAction.BROWSER_LOOKUP)
 def _create_browser_lookup_action(parent):
-    action = QtGui.QAction(icontheme.lookup('lookup-musicbrainz'), _("Lookup in &Browser"), parent)
-    action.setStatusTip(_("Lookup selected item on MusicBrainz website"))
+    action = QtGui.QAction(icontheme.lookup('lookup-musicbrainz'), _("&Open on Website"), parent)
+    action.setStatusTip(_("Open selected item on MusicBrainz website"))
     action.setToolTip(_(
-        "<b>Lookup in Browser</b> &nbsp; <i>Ctrl+Shift+L</i><br><br>"
+        "<b>Open on Website</b> &nbsp; <i>Ctrl+Shift+L</i><br><br>"
         "Opens the MusicBrainz website in your browser to search for "
         "the selected item. Useful for manual lookup or editing "
         "metadata on the website."
@@ -463,10 +463,10 @@ def _create_generate_fingerprints_action(parent):
 
 @add_action(MainAction.CLUSTER)
 def _create_cluster_action(parent):
-    action = QtGui.QAction(icontheme.lookup('picard-cluster'), _("Cl&uster"), parent)
-    action.setStatusTip(_("Cluster files into album clusters"))
+    action = QtGui.QAction(icontheme.lookup('picard-cluster'), _("Group by &Album"), parent)
+    action.setStatusTip(_("Group unmatched files into album clusters"))
     action.setToolTip(_(
-        "<b>Cluster</b> &nbsp; <i>Ctrl+U</i><br><br>"
+        "<b>Group by Album</b> &nbsp; <i>Ctrl+U</i><br><br>"
         "Groups unmatched files into album clusters based on existing "
         "tags. Use this after adding files. Files with similar "
         "album/artist tags will be grouped together."
@@ -497,10 +497,10 @@ def _create_autotag_action(parent):
 
 @add_action(MainAction.VIEW_INFO)
 def _create_view_info_action(parent):
-    action = QtGui.QAction(icontheme.lookup('picard-edit-tags'), _("&Info…"), parent)
+    action = QtGui.QAction(icontheme.lookup('picard-edit-tags'), _("&Track Details…"), parent)
     action.setStatusTip(_("Show detailed information about selected files"))
     action.setToolTip(_(
-        "<b>Info</b> &nbsp; <i>Ctrl+I</i><br><br>"
+        "<b>Track Details</b> &nbsp; <i>Ctrl+I</i><br><br>"
         "Shows detailed metadata for the selected track, including "
         "original tags, matched tags, and file information."
     ))
