@@ -210,7 +210,7 @@ def _create_trash_action(parent):
 
 @add_action(MainAction.SUBMIT_ACOUSTID)
 def _create_submit_acoustid_action(parent):
-    action = QtGui.QAction(icontheme.lookup('acoustid-fingerprinter'), _("Submit &Fingerprints"), parent)
+    action = QtGui.QAction(icontheme.lookup('acoustid-fingerprinter'), _("S&ubmit Fingerprints"), parent)
     action.setStatusTip(_("Submit audio fingerprints to AcoustID"))
     action.setToolTip(_(
         "<b>Submit Fingerprints</b><br><br>"
@@ -244,7 +244,7 @@ def _create_remove_action(parent):
 
 @add_action(MainAction.BROWSER_LOOKUP)
 def _create_browser_lookup_action(parent):
-    action = QtGui.QAction(icontheme.lookup('lookup-musicbrainz'), _("&Open on Website"), parent)
+    action = QtGui.QAction(icontheme.lookup('lookup-musicbrainz'), _("Open on &Website"), parent)
     action.setStatusTip(_("Open selected item on MusicBrainz website"))
     action.setToolTip(_(
         "<b>Open on Website</b> &nbsp; <i>Ctrl+Shift+L</i><br><br>"
