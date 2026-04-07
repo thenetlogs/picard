@@ -185,7 +185,7 @@ def _create_save_action(parent):
     action = QtGui.QAction(icontheme.lookup('document-save'), _("&Save"), parent)
     action.setStatusTip(_("Save selected files"))
     action.setToolTip(_(
-        "<b>Save</b><br><br>"
+        "<b>Save</b> &nbsp; <i>Ctrl+S</i><br><br>"
         "Writes the proposed tag changes to your files. This "
         "modifies the actual audio files on disk. Review changes "
         "in the right pane before saving."
@@ -216,7 +216,7 @@ def _create_submit_acoustid_action(parent):
         "<b>Submit AcoustIDs</b><br><br>"
         "Submits audio fingerprints to the AcoustID database. "
         "This helps improve identification for other users. "
-        "Does NOT save or modify your tags \u2014 use Save for that."
+        "Does NOT save or modify your tags — use Save for that."
     ))
     action.setEnabled(False)
     action.triggered.connect(parent._on_submit_acoustid)
