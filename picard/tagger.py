@@ -1405,6 +1405,17 @@ class Tagger(QtWidgets.QApplication):
             if obj.can_autotag:
                 obj.lookup_metadata()
 
+    def identify(self, objects):
+        """Run Lookup and Scan in parallel for best identification.
+
+        Both methods use existing _lookup_finished callbacks. Metadata
+        lookup is typically faster; if AcoustID finds a better match
+        later, it overrides via move_file_to_track.
+        """
+        self.autotag(objects)
+        if self.use_acoustid:
+            self.analyze(objects)
+
     # =======================================================================
     #  Clusters
     # =======================================================================
