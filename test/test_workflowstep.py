@@ -97,6 +97,7 @@ class TestWorkflowStepIndicator:
         assert w._bubbles[0].property("state") == "complete"
         assert w._bubbles[1].property("state") == "active"
         assert w._bubbles[2].property("state") == "inactive"
+        assert w._bubbles[3].property("state") == "inactive"
 
     def test_complete_bubble_shows_checkmark(self, qt_app):
         from picard.ui.widgets.workflowstep import WorkflowStepIndicator, StepState
