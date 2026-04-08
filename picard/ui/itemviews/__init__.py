@@ -68,6 +68,14 @@ from picard.i18n import (
 from picard.track import Track
 from picard.util import icontheme
 
+from picard.ui.iconrender import (
+    _init_icons,
+    FILE_ICONS,
+    MATCH_ICONS,
+    MATCH_PENDING_ICONS,
+    ALBUM_ICONS,
+)
+
 from picard.ui.colors import interface_colors
 from picard.ui.columns import (
     ColumnAlign,
@@ -257,31 +265,27 @@ class MainPanel(QtWidgets.QSplitter):
             ClusterItem.icon_dir = self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DirIcon)
         else:
             ClusterItem.icon_dir = icontheme.lookup('folder', icontheme.ICON_SIZE_MENU)
-        AlbumItem.icon_cd = icontheme.lookup('media-optical', icontheme.ICON_SIZE_MENU)
-        AlbumItem.icon_cd_modified = icontheme.lookup('media-optical-modified', icontheme.ICON_SIZE_MENU)
-        AlbumItem.icon_cd_saved = icontheme.lookup('media-optical-saved', icontheme.ICON_SIZE_MENU)
-        AlbumItem.icon_cd_saved_modified = icontheme.lookup('media-optical-saved-modified', icontheme.ICON_SIZE_MENU)
-        AlbumItem.icon_error = icontheme.lookup('media-optical-error', icontheme.ICON_SIZE_MENU)
+        # Initialize Unicode status icons
+        _init_icons()
+
+        AlbumItem.icon_cd = ALBUM_ICONS["incomplete"]
+        AlbumItem.icon_cd_modified = ALBUM_ICONS["complete_unsaved"]
+        AlbumItem.icon_cd_saved = ALBUM_ICONS["complete_saved"]
+        AlbumItem.icon_cd_saved_modified = ALBUM_ICONS["complete_saved"]
+        AlbumItem.icon_error = ALBUM_ICONS["error"]
         TrackItem.icon_audio = QtGui.QIcon(":/images/track-audio.png")
         TrackItem.icon_video = QtGui.QIcon(":/images/track-video.png")
         TrackItem.icon_data = QtGui.QIcon(":/images/track-data.png")
-        TrackItem.icon_error = icontheme.lookup('dialog-error', icontheme.ICON_SIZE_MENU)
-        FileItem.icon_file = QtGui.QIcon(":/images/file.png")
-        FileItem.icon_file_pending = QtGui.QIcon(":/images/file-pending.png")
-        FileItem.icon_error = icontheme.lookup('dialog-error', icontheme.ICON_SIZE_MENU)
-        FileItem.icon_error_not_found = icontheme.lookup('error-not-found', icontheme.ICON_SIZE_MENU)
-        FileItem.icon_error_no_access = icontheme.lookup('error-no-access', icontheme.ICON_SIZE_MENU)
-        FileItem.icon_saved = QtGui.QIcon(":/images/track-saved.png")
+        TrackItem.icon_error = FILE_ICONS["error"]
+        FileItem.icon_file = FILE_ICONS["unmatched"]
+        FileItem.icon_file_pending = FILE_ICONS["pending"]
+        FileItem.icon_error = FILE_ICONS["error"]
+        FileItem.icon_error_not_found = FILE_ICONS["not_found"]
+        FileItem.icon_error_no_access = FILE_ICONS["not_found"]
+        FileItem.icon_saved = FILE_ICONS["saved"]
         FileItem.icon_fingerprint = icontheme.lookup('fingerprint', icontheme.ICON_SIZE_MENU)
         FileItem.icon_fingerprint_gray = icontheme.lookup('fingerprint-gray', icontheme.ICON_SIZE_MENU)
-        FileItem.match_icons = [
-            QtGui.QIcon(":/images/match-50.png"),
-            QtGui.QIcon(":/images/match-60.png"),
-            QtGui.QIcon(":/images/match-70.png"),
-            QtGui.QIcon(":/images/match-80.png"),
-            QtGui.QIcon(":/images/match-90.png"),
-            QtGui.QIcon(":/images/match-100.png"),
-        ]
+        FileItem.match_icons = MATCH_ICONS
         FileItem.match_icons_info = [
             N_("Bad match"),
             N_("Poor match"),
@@ -290,14 +294,7 @@ class MainPanel(QtWidgets.QSplitter):
             N_("Great match"),
             N_("Excellent match"),
         ]
-        FileItem.match_pending_icons = [
-            QtGui.QIcon(":/images/match-pending-50.png"),
-            QtGui.QIcon(":/images/match-pending-60.png"),
-            QtGui.QIcon(":/images/match-pending-70.png"),
-            QtGui.QIcon(":/images/match-pending-80.png"),
-            QtGui.QIcon(":/images/match-pending-90.png"),
-            QtGui.QIcon(":/images/match-pending-100.png"),
-        ]
+        FileItem.match_pending_icons = MATCH_PENDING_ICONS
 
     def _update_selection(self, selected_view):
         for view in self._views:

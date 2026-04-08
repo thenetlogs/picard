@@ -90,3 +90,51 @@ class TestRenderUnicodeIcon:
         for sym in symbols:
             icon = render_unicode_icon(sym, color, 16)
             assert not icon.isNull(), f"Symbol {sym} produced null icon"
+
+
+class TestFileStatusIcons:
+    """Tests that file status icons use correct Unicode symbols and colors."""
+
+    @pytest.fixture(autouse=True)
+    def _init(self, qt_app):
+        from picard.ui.iconrender import _init_icons
+        _init_icons()
+
+    def test_file_icon_unmatched(self, qt_app):
+        from picard.ui.iconrender import FILE_ICONS
+        icon = FILE_ICONS["unmatched"]
+        assert not icon.isNull()
+
+    def test_file_icon_pending(self, qt_app):
+        from picard.ui.iconrender import FILE_ICONS
+        icon = FILE_ICONS["pending"]
+        assert not icon.isNull()
+
+    def test_file_icon_saved(self, qt_app):
+        from picard.ui.iconrender import FILE_ICONS
+        icon = FILE_ICONS["saved"]
+        assert not icon.isNull()
+
+    def test_file_icon_error(self, qt_app):
+        from picard.ui.iconrender import FILE_ICONS
+        icon = FILE_ICONS["error"]
+        assert not icon.isNull()
+
+    def test_file_icon_not_found(self, qt_app):
+        from picard.ui.iconrender import FILE_ICONS
+        icon = FILE_ICONS["not_found"]
+        assert not icon.isNull()
+
+    def test_match_icons_have_6_levels(self, qt_app):
+        from picard.ui.iconrender import MATCH_ICONS
+        assert len(MATCH_ICONS) == 6
+
+    def test_match_pending_icons_have_6_levels(self, qt_app):
+        from picard.ui.iconrender import MATCH_PENDING_ICONS
+        assert len(MATCH_PENDING_ICONS) == 6
+
+    def test_match_icons_colors_differ(self, qt_app):
+        from picard.ui.iconrender import MATCH_ICONS
+        px_first = MATCH_ICONS[0].pixmap(16, 16).toImage()
+        px_last = MATCH_ICONS[5].pixmap(16, 16).toImage()
+        assert px_first != px_last
