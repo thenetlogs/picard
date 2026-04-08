@@ -653,7 +653,6 @@ class BaseTreeView(QtWidgets.QTreeWidget):
         """Start drag, *without* using pixmap."""
         items = self.selectedItems()
         if items:
-            self._dim_source_items(items)
             drag = QtGui.QDrag(self)
             drag.setMimeData(self.mimeData(items))
             # Render the dragged element as drag representation
@@ -662,6 +661,8 @@ class BaseTreeView(QtWidgets.QTreeWidget):
             pixmap = QtGui.QPixmap(rectangle.width(), rectangle.height())
             self.viewport().render(pixmap, QtCore.QPoint(), QtGui.QRegion(rectangle))
             drag.setPixmap(pixmap)
+            # Dim source items AFTER pixmap render so drag preview shows normal text
+            self._dim_source_items(items)
             drag.exec(QtCore.Qt.DropAction.MoveAction)
             self._restore_source_items()
 
