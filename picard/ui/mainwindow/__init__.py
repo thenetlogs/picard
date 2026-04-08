@@ -615,7 +615,8 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
     @throttle(100)
     def _update_workflow_indicator(self):
         """Recompute and refresh the workflow step indicator."""
-        from picard.file import File
+        if not hasattr(self, 'workflow_indicator'):
+            return
         changed_count = sum(
             1 for f in self.tagger.iter_all_files()
             if f.state == File.State.CHANGED
