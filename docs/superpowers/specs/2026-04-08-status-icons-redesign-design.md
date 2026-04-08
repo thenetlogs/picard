@@ -50,11 +50,13 @@ Pending match uses the same gradient colors but with ⟳ symbol instead of ◆.
 
 ### Implementation
 
-**Icon rendering:** Create a helper function `render_unicode_icon(symbol, color, size)` that:
-1. Creates a `QPixmap(size, size)` with transparent background
+**Icon rendering:** Create a helper function `render_unicode_icon(symbol, color, size, device_pixel_ratio=1.0)` that:
+1. Creates a `QPixmap(size * dpr, size * dpr)` with transparent background, sets `setDevicePixelRatio(dpr)`
 2. Uses `QPainter` + `drawText()` to render the Unicode symbol centered
-3. Sets font size to fill the pixmap
+3. Sets font size to ~75% of pixmap logical size for visual balance
 4. Returns `QIcon(pixmap)`
+
+**High-DPI support:** Icons must account for `devicePixelRatio()` — render at physical resolution, set logical size via `setDevicePixelRatio()`. This replaces the need for @2x PNG variants.
 
 **Icon caching:** Pre-render all icons in `MainPanel.create_icons()` (same as current PNG loading), stored as class attributes on `FileItem`, `AlbumItem`, etc. No per-frame rendering.
 
