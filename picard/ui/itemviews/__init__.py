@@ -271,7 +271,7 @@ class MainPanel(QtWidgets.QSplitter):
         AlbumItem.icon_cd = ALBUM_ICONS["incomplete"]
         AlbumItem.icon_cd_modified = ALBUM_ICONS["complete_unsaved"]
         AlbumItem.icon_cd_saved = ALBUM_ICONS["complete_saved"]
-        AlbumItem.icon_cd_saved_modified = ALBUM_ICONS["complete_saved"]
+        AlbumItem.icon_cd_saved_modified = ALBUM_ICONS["complete_unsaved"]
         AlbumItem.icon_error = ALBUM_ICONS["error"]
         TrackItem.icon_audio = QtGui.QIcon(":/images/track-audio.png")
         TrackItem.icon_video = QtGui.QIcon(":/images/track-video.png")
