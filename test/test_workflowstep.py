@@ -10,8 +10,21 @@
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
 
+import os
+import sys
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+
 from picard.ui.widgets.workflowstep import StepState, compute_workflow_states
 import pytest
+from PyQt6 import QtWidgets
+
+
+@pytest.fixture(scope="module")
+def qt_app():
+    app = QtWidgets.QApplication.instance()
+    if app is None:
+        app = QtWidgets.QApplication(sys.argv[:1])
+    yield app
 
 
 def cws(files, albums, pending, changed):
@@ -56,8 +69,10 @@ class TestComputeWorkflowStates:
         assert s[2] == StepState.COMPLETE
         assert s[3] == StepState.COMPLETE
 
-    def test_no_files_only_step1_active(self):
-        s = cws(0, 0, 0, 0)
-        assert s[0] == StepState.ACTIVE
-        for i in range(1, 4):
-            assert s[i] == StepState.INACTIVE
+    def test_pending_no_albums(self):
+        """Files present, pending requests but no albums yet (fingerprinting started)."""
+        s = cws(3, 0, 2, 0)
+        assert s[0] == StepState.COMPLETE
+        assert s[1] == StepState.ACTIVE    # pending in progress
+        assert s[2] == StepState.INACTIVE
+        assert s[3] == StepState.INACTIVE

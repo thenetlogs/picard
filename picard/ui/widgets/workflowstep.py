@@ -41,6 +41,10 @@ def compute_workflow_states(
     Pure function — takes plain integers so it is unit-testable without Qt.
     Returns a list of four StepState values:
       [Add Files, Identify, Review, Save]
+
+    Note: If album_count > 0 but file_count == 0 (all files removed while albums
+    remain), steps 3 and 4 may show COMPLETE while step 1 shows ACTIVE. This is a
+    transient state during file removal; callers should handle it gracefully.
     """
     # Step 1: Add Files
     step1 = StepState.COMPLETE if file_count > 0 else StepState.ACTIVE
@@ -108,7 +112,7 @@ QLabel[state="active"] {
     border-radius: 10px;
 }
 QLabel[state="complete"] {
-    background-color: #4a9f57;
+    background-color: #2e7d32;
     color: white;
     border-radius: 10px;
 }
@@ -165,6 +169,10 @@ class WorkflowStepIndicator(QtWidgets.QWidget):
 
     def set_states(self, states: list[StepState]) -> None:
         """Apply a list of 4 StepState values to the indicator bubbles and labels."""
+        if len(states) != len(self._bubbles):
+            raise ValueError(
+                f"set_states() expected {len(self._bubbles)} states, got {len(states)}"
+            )
         for i, (bubble, label, state) in enumerate(
             zip(self._bubbles, self._labels, states)
         ):
