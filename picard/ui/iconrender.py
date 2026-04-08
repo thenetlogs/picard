@@ -61,16 +61,18 @@ def render_unicode_icon(symbol, color, size, device_pixel_ratio=1.0):
 
 
 def _init_icons():
-    """Pre-render all Unicode status icons. Call after QApplication exists."""
-    global FILE_ICONS, MATCH_ICONS, MATCH_PENDING_ICONS, ALBUM_ICONS
+    """Pre-render all Unicode status icons. Call after QApplication exists.
 
-    FILE_ICONS = {
+    Mutates existing module-level dicts/lists in-place so that
+    ``from iconrender import FILE_ICONS`` references stay valid.
+    """
+    FILE_ICONS.update({
         "unmatched": render_unicode_icon("\u25C7", QtGui.QColor(200, 200, 200), 16),
         "pending": render_unicode_icon("\u27F3", QtGui.QColor(240, 192, 64), 16),
         "saved": render_unicode_icon("\u2714", QtGui.QColor(80, 200, 120), 16),
         "error": render_unicode_icon("\u26A0", QtGui.QColor(224, 80, 80), 16),
         "not_found": render_unicode_icon("\u2298", QtGui.QColor(224, 80, 80), 16),
-    }
+    })
 
     _match_colors = [
         QtGui.QColor(224, 80, 80),
@@ -81,19 +83,21 @@ def _init_icons():
         QtGui.QColor(80, 200, 120),
     ]
 
-    MATCH_ICONS = [
+    MATCH_ICONS.clear()
+    MATCH_ICONS.extend(
         render_unicode_icon("\u25C6", c, 16) for c in _match_colors
-    ]
-    MATCH_PENDING_ICONS = [
+    )
+    MATCH_PENDING_ICONS.clear()
+    MATCH_PENDING_ICONS.extend(
         render_unicode_icon("\u27F3", c, 16) for c in _match_colors
-    ]
+    )
 
-    ALBUM_ICONS = {
+    ALBUM_ICONS.update({
         "incomplete": render_unicode_icon("\u25CE", QtGui.QColor(200, 200, 200), 16),
         "complete_unsaved": render_unicode_icon("\u25C9", QtGui.QColor(77, 166, 255), 16),
         "complete_saved": render_unicode_icon("\u25C9", QtGui.QColor(80, 200, 120), 16),
         "error": render_unicode_icon("\u25C9", QtGui.QColor(224, 80, 80), 16),
-    }
+    })
 
 
 # Module-level placeholders (populated by _init_icons)
