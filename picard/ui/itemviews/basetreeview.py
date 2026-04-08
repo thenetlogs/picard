@@ -197,13 +197,7 @@ class BaseTreeView(QtWidgets.QTreeWidget):
 
         # Drop zone visual feedback
         self._drop_active = False
-        self.setProperty("drop_active", "false")
-        self.setStyleSheet(
-            "*[drop_active=\"true\"] {"
-            "  border: 2px solid palette(highlight);"
-            "  border-radius: 3px;"
-            "}"
-        )
+        self._default_frame_style = self.frameStyle()
 
         # Row-level drop highlight
         self._drop_highlight_item = None
@@ -589,9 +583,18 @@ class BaseTreeView(QtWidgets.QTreeWidget):
         if self._drop_active == active:
             return
         self._drop_active = active
-        self.setProperty("drop_active", "true" if active else "false")
-        self.style().unpolish(self)
-        self.style().polish(self)
+        if active:
+            highlight = self.palette().highlight().color()
+            highlight.setAlphaF(0.4)
+            self.setStyleSheet(
+                "QTreeWidget {"
+                "  border: 2px solid rgba(%d, %d, %d, %d);"
+                "  border-radius: 3px;"
+                "}" % (highlight.red(), highlight.green(),
+                       highlight.blue(), highlight.alpha())
+            )
+        else:
+            self.setStyleSheet("")
 
     def dragLeaveEvent(self, event):
         self._set_drop_active(False)
@@ -609,7 +612,7 @@ class BaseTreeView(QtWidgets.QTreeWidget):
             col: item.background(col) for col in range(col_count)
         }
         highlight_color = self.palette().highlight().color()
-        highlight_color.setAlphaF(0.18)
+        highlight_color.setAlphaF(0.35)
         brush = QtGui.QBrush(highlight_color)
         for col in range(col_count):
             item.setBackground(col, brush)

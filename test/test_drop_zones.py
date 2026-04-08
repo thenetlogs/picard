@@ -85,26 +85,29 @@ def _make_test_view_with_items(col_count=2, item_count=3):
 class TestPanelDropZone:
     """Tests for BaseTreeView panel-level drop zone visual feedback."""
 
-    def test_drop_active_property_default_false(self, qt_app):
+    def test_drop_active_default_false(self, qt_app):
         view = _make_test_view()
-        assert view.property("drop_active") == "false"
+        assert view._drop_active is False
+        assert view.styleSheet() == ""
 
     def test_set_drop_active_true(self, qt_app):
         view = _make_test_view()
         view._set_drop_active(True)
-        assert view.property("drop_active") == "true"
+        assert view._drop_active is True
+        assert "border" in view.styleSheet()
 
     def test_set_drop_active_false(self, qt_app):
         view = _make_test_view()
         view._set_drop_active(True)
         view._set_drop_active(False)
-        assert view.property("drop_active") == "false"
+        assert view._drop_active is False
+        assert view.styleSheet() == ""
 
     def test_set_drop_active_idempotent(self, qt_app):
         view = _make_test_view()
         view._set_drop_active(True)
         view._set_drop_active(True)
-        assert view.property("drop_active") == "true"
+        assert view._drop_active is True
 
 
 class TestPanelDropZoneDragEvents:
@@ -135,14 +138,14 @@ class TestPanelDropZoneDragEvents:
         mime.setUrls([QtCore.QUrl.fromLocalFile("/tmp/test.flac")])
         event = self._make_drag_event(QtGui.QDragEnterEvent, mime)
         view.dragEnterEvent(event)
-        assert view.property("drop_active") == "true"
+        assert view._drop_active is True
 
     def test_drag_leave_deactivates_drop_zone(self, qt_app):
         view = _make_test_view()
         view._set_drop_active(True)
         event = QtGui.QDragLeaveEvent()
         view.dragLeaveEvent(event)
-        assert view.property("drop_active") == "false"
+        assert view._drop_active is False
 
     def test_drop_deactivates_drop_zone(self, qt_app):
         view = _make_test_view()
@@ -155,7 +158,7 @@ class TestPanelDropZoneDragEvents:
             action=QtCore.Qt.DropAction.IgnoreAction,
         )
         view.dropEvent(event)
-        assert view.property("drop_active") == "false"
+        assert view._drop_active is False
 
 
 class TestRowDropHighlight:
