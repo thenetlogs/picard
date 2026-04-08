@@ -105,3 +105,54 @@ class TestPanelDropZone:
         view._set_drop_active(True)
         view._set_drop_active(True)
         assert view.property("drop_active") == "true"
+
+
+class TestPanelDropZoneDragEvents:
+    """Tests that drag events toggle drop_active."""
+
+    def _make_drag_event(self, event_class, mime_data, pos=None, action=None):
+        """Create a drag/drop event with MIME data."""
+        if action is None:
+            action = QtCore.Qt.DropAction.CopyAction
+        # QDragEnterEvent/QDragMoveEvent take QPoint; QDropEvent takes QPointF
+        if event_class in (QtGui.QDragEnterEvent, QtGui.QDragMoveEvent):
+            if pos is None:
+                pos = QtCore.QPoint(10, 10)
+        else:
+            if pos is None:
+                pos = QtCore.QPointF(10, 10)
+        return event_class(
+            pos,
+            action,
+            mime_data,
+            QtCore.Qt.MouseButton.LeftButton,
+            QtCore.Qt.KeyboardModifier.NoModifier,
+        )
+
+    def test_drag_enter_activates_drop_zone(self, qt_app):
+        view = _make_test_view()
+        mime = QtCore.QMimeData()
+        mime.setUrls([QtCore.QUrl.fromLocalFile("/tmp/test.flac")])
+        event = self._make_drag_event(QtGui.QDragEnterEvent, mime)
+        view.dragEnterEvent(event)
+        assert view.property("drop_active") == "true"
+
+    def test_drag_leave_deactivates_drop_zone(self, qt_app):
+        view = _make_test_view()
+        view._set_drop_active(True)
+        event = QtGui.QDragLeaveEvent()
+        view.dragLeaveEvent(event)
+        assert view.property("drop_active") == "false"
+
+    def test_drop_deactivates_drop_zone(self, qt_app):
+        view = _make_test_view()
+        view._set_drop_active(True)
+        mime = QtCore.QMimeData()
+        # Use IgnoreAction to hit the early return path and avoid
+        # QTreeView.dropEvent internals crashing in headless env
+        event = self._make_drag_event(
+            QtGui.QDropEvent, mime,
+            action=QtCore.Qt.DropAction.IgnoreAction,
+        )
+        view.dropEvent(event)
+        assert view.property("drop_active") == "false"

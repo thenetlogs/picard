@@ -560,6 +560,7 @@ class BaseTreeView(QtWidgets.QTreeWidget):
     def dragEnterEvent(self, event):
         super().dragEnterEvent(event)
         self._handle_external_drag(event)
+        self._set_drop_active(True)
 
     def dragMoveEvent(self, event):
         super().dragMoveEvent(event)
@@ -578,6 +579,15 @@ class BaseTreeView(QtWidgets.QTreeWidget):
         self.setProperty("drop_active", "true" if active else "false")
         self.style().unpolish(self)
         self.style().polish(self)
+
+    def dragLeaveEvent(self, event):
+        self._set_drop_active(False)
+        self._clear_drop_highlight()
+        super().dragLeaveEvent(event)
+
+    def _clear_drop_highlight(self):
+        """Clear row-level drop highlight. Implemented in Task 3."""
+        pass
 
     def startDrag(self, supportedActions):
         """Start drag, *without* using pixmap."""
@@ -641,6 +651,8 @@ class BaseTreeView(QtWidgets.QTreeWidget):
             tagger.add_paths(new_paths, target=target)
 
     def dropEvent(self, event):
+        self._set_drop_active(False)
+        self._clear_drop_highlight()
         if event.proposedAction() == QtCore.Qt.DropAction.IgnoreAction:
             event.acceptProposedAction()
             return
