@@ -515,14 +515,14 @@ def _create_identify_action(parent):
     )
     action.setToolTip(
         _(
-            "<b>Identify</b> &nbsp; <i>Ctrl+I</i><br><br>"
+            "<b>Identify</b> &nbsp; <i>Ctrl+Shift+I</i><br><br>"
             "Runs both Lookup (metadata) and Scan (fingerprint) in "
             "parallel and picks the best result. Use this when you're "
             "not sure which method will work better."
         )
     )
     action.setEnabled(False)
-    action.setShortcut(QtGui.QKeySequence(_("Ctrl+I")))
+    action.setShortcut(QtGui.QKeySequence(_("Ctrl+Shift+I")))
     action.triggered.connect(parent.identify)
     return action
 
