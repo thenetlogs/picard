@@ -194,6 +194,17 @@ class BaseTreeView(QtWidgets.QTreeWidget):
         self.setAcceptDrops(True)
         self.setDragEnabled(True)
         self.setDropIndicatorShown(True)
+
+        # Drop zone visual feedback
+        self._drop_active = False
+        self.setProperty("drop_active", "false")
+        self.setStyleSheet(
+            "*[drop_active=\"true\"] {"
+            "  border: 2px solid palette(highlight);"
+            "  border-radius: 3px;"
+            "}"
+        )
+
         self.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
 
         self.setSortingEnabled(True)
@@ -558,6 +569,15 @@ class BaseTreeView(QtWidgets.QTreeWidget):
         if event.isAccepted() and (not event.source() or event.mimeData().hasUrls()):
             event.setDropAction(QtCore.Qt.DropAction.CopyAction)
             event.accept()
+
+    def _set_drop_active(self, active):
+        """Toggle panel-level drop zone visual feedback."""
+        if self._drop_active == active:
+            return
+        self._drop_active = active
+        self.setProperty("drop_active", "true" if active else "false")
+        self.style().unpolish(self)
+        self.style().polish(self)
 
     def startDrag(self, supportedActions):
         """Start drag, *without* using pixmap."""
