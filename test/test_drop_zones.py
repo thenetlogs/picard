@@ -205,3 +205,26 @@ class TestRowDropHighlight:
         view = _make_test_view_with_items()
         view._clear_drop_highlight()
         assert view._drop_highlight_item is None
+
+
+class TestSourceItemDimming:
+    """Tests for source item dimming during drag."""
+
+    def test_dim_source_items_reduces_opacity(self, qt_app):
+        view = _make_test_view_with_items()
+        items = [view.topLevelItem(0), view.topLevelItem(1)]
+        view._dim_source_items(items)
+        for item in items:
+            fg = item.foreground(0).color()
+            assert fg.alphaF() < 1.0
+
+    def test_restore_source_items_resets_opacity(self, qt_app):
+        view = _make_test_view_with_items()
+        items = [view.topLevelItem(0)]
+        view._dim_source_items(items)
+        view._restore_source_items()
+        assert items[0].foreground(0).style() == QtCore.Qt.BrushStyle.NoBrush
+
+    def test_restore_when_nothing_dimmed_is_noop(self, qt_app):
+        view = _make_test_view_with_items()
+        view._restore_source_items()

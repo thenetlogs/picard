@@ -209,6 +209,10 @@ class BaseTreeView(QtWidgets.QTreeWidget):
         self._drop_highlight_item = None
         self._drop_highlight_orig_bg = {}
 
+        # Source item dimming during drag
+        self._dimmed_items = []
+        self._dimmed_orig_fg = {}
+
         self.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
 
         self.setSortingEnabled(True)
@@ -619,10 +623,37 @@ class BaseTreeView(QtWidgets.QTreeWidget):
         self._drop_highlight_item = None
         self._drop_highlight_orig_bg = {}
 
+    def _dim_source_items(self, items):
+        """Dim the foreground of items being dragged."""
+        self._dimmed_items = list(items)
+        self._dimmed_orig_fg = {}
+        col_count = self.columnCount()
+        for item in items:
+            self._dimmed_orig_fg[id(item)] = {
+                col: item.foreground(col) for col in range(col_count)
+            }
+            fg_color = self.palette().text().color()
+            fg_color.setAlphaF(0.4)
+            dim_brush = QtGui.QBrush(fg_color)
+            for col in range(col_count):
+                item.setForeground(col, dim_brush)
+
+    def _restore_source_items(self):
+        """Restore dimmed items to their original foreground."""
+        if not self._dimmed_items:
+            return
+        for item in self._dimmed_items:
+            orig = self._dimmed_orig_fg.get(id(item), {})
+            for col, brush in orig.items():
+                item.setForeground(col, brush)
+        self._dimmed_items = []
+        self._dimmed_orig_fg = {}
+
     def startDrag(self, supportedActions):
         """Start drag, *without* using pixmap."""
         items = self.selectedItems()
         if items:
+            self._dim_source_items(items)
             drag = QtGui.QDrag(self)
             drag.setMimeData(self.mimeData(items))
             # Render the dragged element as drag representation
@@ -632,6 +663,7 @@ class BaseTreeView(QtWidgets.QTreeWidget):
             self.viewport().render(pixmap, QtCore.QPoint(), QtGui.QRegion(rectangle))
             drag.setPixmap(pixmap)
             drag.exec(QtCore.Qt.DropAction.MoveAction)
+            self._restore_source_items()
 
     def mimeData(self, items):
         """Return MIME data for specified items."""
