@@ -1959,6 +1959,9 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
     def autotag(self):
         self.tagger.autotag(self.selected_objects)
 
+    def identify(self):
+        self.tagger.identify(self.selected_objects)
+
     def copy_files(self, objects):
         mimeData = QtCore.QMimeData()
         mimeData.setUrls(QtCore.QUrl.fromLocalFile(f.filename) for f in iter_files_from_objects(objects))

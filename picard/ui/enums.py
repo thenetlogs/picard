@@ -65,6 +65,7 @@ class MainAction(str, Enum):
     ALBUM_SEARCH = 'album_search_action'
     ANALYZE = 'analyze_action'
     AUTOTAG = 'autotag_action'
+    IDENTIFY = 'identify_action'
     BROWSER_LOOKUP = 'browser_lookup_action'
     CD_LOOKUP = 'cd_lookup_action'
     CHECK_UPDATE = 'check_update_action'

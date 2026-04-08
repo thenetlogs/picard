@@ -507,6 +507,26 @@ def _create_autotag_action(parent):
     return action
 
 
+@add_action(MainAction.IDENTIFY)
+def _create_identify_action(parent):
+    action = QtGui.QAction(icontheme.lookup('picard-auto-tag'), _("&Identify"), parent)
+    action.setStatusTip(
+        _("Identify files using both metadata lookup and audio fingerprinting")
+    )
+    action.setToolTip(
+        _(
+            "<b>Identify</b> &nbsp; <i>Ctrl+I</i><br><br>"
+            "Runs both Lookup (metadata) and Scan (fingerprint) in "
+            "parallel and picks the best result. Use this when you're "
+            "not sure which method will work better."
+        )
+    )
+    action.setEnabled(False)
+    action.setShortcut(QtGui.QKeySequence(_("Ctrl+I")))
+    action.triggered.connect(parent.identify)
+    return action
+
+
 @add_action(MainAction.VIEW_INFO)
 def _create_view_info_action(parent):
     action = QtGui.QAction(icontheme.lookup('picard-edit-tags'), _("&Track Details…"), parent)
