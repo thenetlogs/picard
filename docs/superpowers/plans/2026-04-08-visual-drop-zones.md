@@ -10,6 +10,11 @@
 
 **Spec:** `docs/superpowers/specs/2026-04-08-visual-drop-zones-design.md`
 
+**Known Qt CSS limitations (spec deviations):**
+- `box-shadow` is not supported in Qt stylesheets — panel glow uses border-only styling
+- CSS `transition` is not supported — property changes apply instantly (no 200ms fade)
+- Per-item left border accent bar is not possible via `QTreeWidgetItem` — row highlight uses background tint only. A custom `QStyledItemDelegate` would be needed for the left bar, deferred as optional enhancement.
+
 ---
 
 ### Task 1: Panel-level drop zone — test + implementation
@@ -68,45 +73,55 @@ def qt_app():
     yield app
 
 
+def _make_test_view():
+    """Create a minimal BaseTreeView for testing (shared helper)."""
+    from picard.ui.itemviews.basetreeview import BaseTreeView
+
+    class TestTreeView(BaseTreeView):
+        NAME = "test"
+        DESCRIPTION = "test view"
+
+        def __init__(self):
+            columns = []
+            window = type('W', (), {
+                'selected_objects': [],
+                'update_selection': lambda *a: None,
+            })()
+            super().__init__(columns, window)
+
+    return TestTreeView()
+
+
+def _make_test_view_with_items(col_count=2, item_count=3):
+    """Create a BaseTreeView with test items (shared helper)."""
+    view = _make_test_view()
+    view.setColumnCount(col_count)
+    for i in range(item_count):
+        item = QtWidgets.QTreeWidgetItem([f"Item {i}"] + [f"Col{c} {i}" for c in range(1, col_count)])
+        view.addTopLevelItem(item)
+    return view
+
+
 class TestPanelDropZone:
     """Tests for BaseTreeView panel-level drop zone visual feedback."""
 
-    def _make_view(self, qt_app):
-        """Create a minimal BaseTreeView for testing."""
-        from picard.ui.itemviews.basetreeview import BaseTreeView
-
-        class TestTreeView(BaseTreeView):
-            NAME = "test"
-            DESCRIPTION = "test view"
-
-            def __init__(self):
-                # BaseTreeView.__init__ requires columns and window — stub them
-                columns = []
-                window = type('W', (), {
-                    'selected_objects': [],
-                    'update_selection': lambda *a: None,
-                })()
-                super().__init__(columns, window)
-
-        return TestTreeView()
-
     def test_drop_active_property_default_false(self, qt_app):
-        view = self._make_view(qt_app)
+        view = _make_test_view()
         assert view.property("drop_active") == "false"
 
     def test_set_drop_active_true(self, qt_app):
-        view = self._make_view(qt_app)
+        view = _make_test_view()
         view._set_drop_active(True)
         assert view.property("drop_active") == "true"
 
     def test_set_drop_active_false(self, qt_app):
-        view = self._make_view(qt_app)
+        view = _make_test_view()
         view._set_drop_active(True)
         view._set_drop_active(False)
         assert view.property("drop_active") == "false"
 
     def test_set_drop_active_idempotent(self, qt_app):
-        view = self._make_view(qt_app)
+        view = _make_test_view()
         view._set_drop_active(True)
         view._set_drop_active(True)
         assert view.property("drop_active") == "true"
@@ -126,12 +141,14 @@ In `picard/ui/itemviews/basetreeview.py`, add to `BaseTreeView.__init__` (after 
         self._drop_active = False
         self.setProperty("drop_active", "false")
         self.setStyleSheet(
-            "BaseTreeView[drop_active=\"true\"] {"
+            "*[drop_active=\"true\"] {"
             "  border: 2px solid palette(highlight);"
             "  border-radius: 3px;"
             "}"
         )
 ```
+
+Note: Qt stylesheet type selectors match C++ class names, not Python subclass names. `BaseTreeView` would not match — use universal selector `*` instead (same approach works for `FileTreeView` and `AlbumTreeView` since the property is set on each instance).
 
 Add the `_set_drop_active` method to `BaseTreeView` (after `_handle_external_drag`):
 
@@ -174,37 +191,22 @@ Add to `test/test_drop_zones.py`:
 class TestPanelDropZoneDragEvents:
     """Tests that drag events toggle drop_active."""
 
-    def _make_view(self, qt_app):
-        from picard.ui.itemviews.basetreeview import BaseTreeView
-
-        class TestTreeView(BaseTreeView):
-            NAME = "test"
-            DESCRIPTION = "test view"
-
-            def __init__(self):
-                columns = []
-                window = type('W', (), {
-                    'selected_objects': [],
-                    'update_selection': lambda *a: None,
-                })()
-                super().__init__(columns, window)
-
-        return TestTreeView()
-
-    def _make_drag_event(self, event_class, mime_data, pos=None):
+    def _make_drag_event(self, event_class, mime_data, pos=None, action=None):
         """Create a drag/drop event with MIME data."""
         if pos is None:
             pos = QtCore.QPointF(10, 10)
+        if action is None:
+            action = QtCore.Qt.DropAction.CopyAction
         return event_class(
             pos,
-            QtCore.Qt.DropAction.CopyAction,
+            action,
             mime_data,
             QtCore.Qt.MouseButton.LeftButton,
             QtCore.Qt.KeyboardModifier.NoModifier,
         )
 
     def test_drag_enter_activates_drop_zone(self, qt_app):
-        view = self._make_view(qt_app)
+        view = _make_test_view()
         mime = QtCore.QMimeData()
         mime.setUrls([QtCore.QUrl.fromLocalFile("/tmp/test.flac")])
         event = self._make_drag_event(QtGui.QDragEnterEvent, mime)
@@ -212,18 +214,22 @@ class TestPanelDropZoneDragEvents:
         assert view.property("drop_active") == "true"
 
     def test_drag_leave_deactivates_drop_zone(self, qt_app):
-        view = self._make_view(qt_app)
+        view = _make_test_view()
         view._set_drop_active(True)
-        event = QtCore.QEvent(QtCore.QEvent.Type.DragLeave)
+        event = QtGui.QDragLeaveEvent()
         view.dragLeaveEvent(event)
         assert view.property("drop_active") == "false"
 
     def test_drop_deactivates_drop_zone(self, qt_app):
-        view = self._make_view(qt_app)
+        view = _make_test_view()
         view._set_drop_active(True)
         mime = QtCore.QMimeData()
-        mime.setUrls([QtCore.QUrl.fromLocalFile("/tmp/test.flac")])
-        event = self._make_drag_event(QtGui.QDropEvent, mime)
+        # Use IgnoreAction to hit the early return path and avoid
+        # QTreeView.dropEvent internals crashing in headless env
+        event = self._make_drag_event(
+            QtGui.QDropEvent, mime,
+            action=QtCore.Qt.DropAction.IgnoreAction,
+        )
         view.dropEvent(event)
         assert view.property("drop_active") == "false"
 ```
@@ -312,43 +318,21 @@ Add to `test/test_drop_zones.py`:
 class TestRowDropHighlight:
     """Tests for row-level drop highlight."""
 
-    def _make_view_with_items(self, qt_app):
-        from picard.ui.itemviews.basetreeview import BaseTreeView
-
-        class TestTreeView(BaseTreeView):
-            NAME = "test"
-            DESCRIPTION = "test view"
-
-            def __init__(self):
-                columns = []
-                window = type('W', (), {
-                    'selected_objects': [],
-                    'update_selection': lambda *a: None,
-                })()
-                super().__init__(columns, window)
-
-        view = TestTreeView()
-        view.setColumnCount(2)
-        for i in range(3):
-            item = QtWidgets.QTreeWidgetItem([f"Item {i}", f"Col2 {i}"])
-            view.addTopLevelItem(item)
-        return view
-
     def test_set_drop_highlight_applies_background(self, qt_app):
-        view = self._make_view_with_items(qt_app)
+        view = _make_test_view_with_items()
         item = view.topLevelItem(0)
         view._set_drop_highlight(item)
         bg = item.background(0)
         assert bg.style() != QtCore.Qt.BrushStyle.NoBrush
 
     def test_set_drop_highlight_tracks_item(self, qt_app):
-        view = self._make_view_with_items(qt_app)
+        view = _make_test_view_with_items()
         item = view.topLevelItem(1)
         view._set_drop_highlight(item)
         assert view._drop_highlight_item is item
 
     def test_clear_drop_highlight_restores_background(self, qt_app):
-        view = self._make_view_with_items(qt_app)
+        view = _make_test_view_with_items()
         item = view.topLevelItem(0)
         orig_bg = item.background(0)
         view._set_drop_highlight(item)
@@ -358,7 +342,7 @@ class TestRowDropHighlight:
         assert view._drop_highlight_item is None
 
     def test_set_highlight_on_new_item_clears_previous(self, qt_app):
-        view = self._make_view_with_items(qt_app)
+        view = _make_test_view_with_items()
         item0 = view.topLevelItem(0)
         item1 = view.topLevelItem(1)
         view._set_drop_highlight(item0)
@@ -368,14 +352,14 @@ class TestRowDropHighlight:
         assert view._drop_highlight_item is item1
 
     def test_set_highlight_same_item_noop(self, qt_app):
-        view = self._make_view_with_items(qt_app)
+        view = _make_test_view_with_items()
         item = view.topLevelItem(0)
         view._set_drop_highlight(item)
         view._set_drop_highlight(item)
         assert view._drop_highlight_item is item
 
     def test_clear_highlight_when_none_is_noop(self, qt_app):
-        view = self._make_view_with_items(qt_app)
+        view = _make_test_view_with_items()
         view._clear_drop_highlight()
         assert view._drop_highlight_item is None
 ```
@@ -466,30 +450,8 @@ Add to `test/test_drop_zones.py`:
 class TestSourceItemDimming:
     """Tests for source item dimming during drag."""
 
-    def _make_view_with_items(self, qt_app):
-        from picard.ui.itemviews.basetreeview import BaseTreeView
-
-        class TestTreeView(BaseTreeView):
-            NAME = "test"
-            DESCRIPTION = "test view"
-
-            def __init__(self):
-                columns = []
-                window = type('W', (), {
-                    'selected_objects': [],
-                    'update_selection': lambda *a: None,
-                })()
-                super().__init__(columns, window)
-
-        view = TestTreeView()
-        view.setColumnCount(2)
-        for i in range(3):
-            item = QtWidgets.QTreeWidgetItem([f"Item {i}", f"Col2 {i}"])
-            view.addTopLevelItem(item)
-        return view
-
     def test_dim_source_items_reduces_opacity(self, qt_app):
-        view = self._make_view_with_items(qt_app)
+        view = _make_test_view_with_items()
         items = [view.topLevelItem(0), view.topLevelItem(1)]
         view._dim_source_items(items)
         for item in items:
@@ -497,14 +459,14 @@ class TestSourceItemDimming:
             assert fg.alphaF() < 1.0
 
     def test_restore_source_items_resets_opacity(self, qt_app):
-        view = self._make_view_with_items(qt_app)
+        view = _make_test_view_with_items()
         items = [view.topLevelItem(0)]
         view._dim_source_items(items)
         view._restore_source_items()
         assert items[0].foreground(0).style() == QtCore.Qt.BrushStyle.NoBrush
 
     def test_restore_when_nothing_dimmed_is_noop(self, qt_app):
-        view = self._make_view_with_items(qt_app)
+        view = _make_test_view_with_items()
         view._restore_source_items()
 ```
 
