@@ -173,6 +173,10 @@ from picard.ui.util import (
     show_session_not_found_dialog,
 )
 from picard.ui.widgets.checkboxmenuitem import CheckboxMenuItem
+from picard.ui.widgets.workflowstep import (
+    WorkflowStepIndicator,
+    compute_workflow_states,
+)
 
 
 SuspendWhileLoadingFuncs = namedtuple('SuspendWhileLoadingFuncs', ('on_enter', 'on_exit'))
@@ -298,7 +302,15 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
 
         main_layout.addWidget(self.panel)
         main_layout.addWidget(self.metadata_view)
-        self.setCentralWidget(main_layout)
+
+        self.workflow_indicator = WorkflowStepIndicator(self)
+        central_container = QtWidgets.QWidget()
+        central_vbox = QtWidgets.QVBoxLayout(central_container)
+        central_vbox.setContentsMargins(0, 0, 0, 0)
+        central_vbox.setSpacing(0)
+        central_vbox.addWidget(self.workflow_indicator)
+        central_vbox.addWidget(main_layout, 1)
+        self.setCentralWidget(central_container)
 
         # accessibility
         self.set_tab_order()
@@ -581,9 +593,11 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         self.statusBar().addPermanentWidget(self.listening_label)
         self.statusBar().addPermanentWidget(self.plugin_updates_button)
         self.tagger.tagger_stats_changed.connect(self._update_statusbar_stats)
+        self.tagger.tagger_stats_changed.connect(self._update_workflow_indicator)
         self.tagger.listen_port_changed.connect(self._update_statusbar_listen_port)
         self._register_status_indicator(infostatus)
         self._update_statusbar_stats()
+        self._update_workflow_indicator()
 
     @throttle(100)
     def _update_statusbar_stats(self):
@@ -597,6 +611,25 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         )
         for indicator in self.status_indicators:
             indicator.update(progress_status)
+
+    @throttle(100)
+    def _update_workflow_indicator(self):
+        """Recompute and refresh the workflow step indicator."""
+        from picard.file import File
+        changed_count = sum(
+            1 for f in self.tagger.iter_all_files()
+            if f.state == File.State.CHANGED
+        )
+        states = compute_workflow_states(
+            file_count=len(self.tagger.files),
+            album_count=len(self.tagger.albums),
+            pending_count=(
+                File.num_pending_files
+                + self.tagger.webservice.num_pending_web_requests
+            ),
+            changed_count=changed_count,
+        )
+        self.workflow_indicator.set_states(states)
 
     def _update_statusbar_listen_port(self, listen_port):
         if listen_port:
