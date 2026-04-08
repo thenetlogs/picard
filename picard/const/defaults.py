@@ -117,6 +117,7 @@ DEFAULT_TOOLBAR_LAYOUT = (
     '-',
     MainAction.CLUSTER,
     '-',
+    MainAction.IDENTIFY,
     MainAction.AUTOTAG,
     MainAction.ANALYZE,
     MainAction.BROWSER_LOOKUP,
