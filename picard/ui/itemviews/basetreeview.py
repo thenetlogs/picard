@@ -205,6 +205,10 @@ class BaseTreeView(QtWidgets.QTreeWidget):
             "}"
         )
 
+        # Row-level drop highlight
+        self._drop_highlight_item = None
+        self._drop_highlight_orig_bg = {}
+
         self.setSelectionMode(QtWidgets.QAbstractItemView.SelectionMode.ExtendedSelection)
 
         self.setSortingEnabled(True)
@@ -565,6 +569,11 @@ class BaseTreeView(QtWidgets.QTreeWidget):
     def dragMoveEvent(self, event):
         super().dragMoveEvent(event)
         self._handle_external_drag(event)
+        item = self.itemAt(event.position().toPoint())
+        if item is not None:
+            self._set_drop_highlight(item)
+        else:
+            self._clear_drop_highlight()
 
     def _handle_external_drag(self, event):
         if event.isAccepted() and (not event.source() or event.mimeData().hasUrls()):
@@ -585,9 +594,30 @@ class BaseTreeView(QtWidgets.QTreeWidget):
         self._clear_drop_highlight()
         super().dragLeaveEvent(event)
 
+    def _set_drop_highlight(self, item):
+        """Apply highlight to the given tree item as a drop target."""
+        if item is self._drop_highlight_item:
+            return
+        self._clear_drop_highlight()
+        self._drop_highlight_item = item
+        col_count = self.columnCount()
+        self._drop_highlight_orig_bg = {
+            col: item.background(col) for col in range(col_count)
+        }
+        highlight_color = self.palette().highlight().color()
+        highlight_color.setAlphaF(0.18)
+        brush = QtGui.QBrush(highlight_color)
+        for col in range(col_count):
+            item.setBackground(col, brush)
+
     def _clear_drop_highlight(self):
-        """Clear row-level drop highlight. Implemented in Task 3."""
-        pass
+        """Clear row-level drop highlight, restoring original backgrounds."""
+        if self._drop_highlight_item is None:
+            return
+        for col, bg in self._drop_highlight_orig_bg.items():
+            self._drop_highlight_item.setBackground(col, bg)
+        self._drop_highlight_item = None
+        self._drop_highlight_orig_bg = {}
 
     def startDrag(self, supportedActions):
         """Start drag, *without* using pixmap."""

@@ -156,3 +156,52 @@ class TestPanelDropZoneDragEvents:
         )
         view.dropEvent(event)
         assert view.property("drop_active") == "false"
+
+
+class TestRowDropHighlight:
+    """Tests for row-level drop highlight."""
+
+    def test_set_drop_highlight_applies_background(self, qt_app):
+        view = _make_test_view_with_items()
+        item = view.topLevelItem(0)
+        view._set_drop_highlight(item)
+        bg = item.background(0)
+        assert bg.style() != QtCore.Qt.BrushStyle.NoBrush
+
+    def test_set_drop_highlight_tracks_item(self, qt_app):
+        view = _make_test_view_with_items()
+        item = view.topLevelItem(1)
+        view._set_drop_highlight(item)
+        assert view._drop_highlight_item is item
+
+    def test_clear_drop_highlight_restores_background(self, qt_app):
+        view = _make_test_view_with_items()
+        item = view.topLevelItem(0)
+        orig_bg = item.background(0)
+        view._set_drop_highlight(item)
+        view._clear_drop_highlight()
+        restored_bg = item.background(0)
+        assert restored_bg.style() == orig_bg.style()
+        assert view._drop_highlight_item is None
+
+    def test_set_highlight_on_new_item_clears_previous(self, qt_app):
+        view = _make_test_view_with_items()
+        item0 = view.topLevelItem(0)
+        item1 = view.topLevelItem(1)
+        view._set_drop_highlight(item0)
+        view._set_drop_highlight(item1)
+        assert item0.background(0).style() == QtCore.Qt.BrushStyle.NoBrush
+        assert item1.background(0).style() != QtCore.Qt.BrushStyle.NoBrush
+        assert view._drop_highlight_item is item1
+
+    def test_set_highlight_same_item_noop(self, qt_app):
+        view = _make_test_view_with_items()
+        item = view.topLevelItem(0)
+        view._set_drop_highlight(item)
+        view._set_drop_highlight(item)
+        assert view._drop_highlight_item is item
+
+    def test_clear_highlight_when_none_is_noop(self, qt_app):
+        view = _make_test_view_with_items()
+        view._clear_drop_highlight()
+        assert view._drop_highlight_item is None
