@@ -991,6 +991,7 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
             _("&Tools"),
             MainAction.REFRESH,
             self.cd_lookup_menu,
+            MainAction.IDENTIFY,
             MainAction.AUTOTAG,
             MainAction.ANALYZE,
             MainAction.CLUSTER,
@@ -1795,6 +1796,7 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         self.enable_action(MainAction.GENERATE_FINGERPRINTS, have_files)
         self.enable_action(MainAction.REFRESH, can_refresh)
         self.enable_action(MainAction.AUTOTAG, can_autotag)
+        self.enable_action(MainAction.IDENTIFY, can_autotag or can_analyze)
         self.enable_action(MainAction.BROWSER_LOOKUP, can_browser_lookup)
         self.enable_action(MainAction.PLAY, have_files)
         self.enable_action(MainAction.PLAY_FILE_EXTERNAL, have_files)
