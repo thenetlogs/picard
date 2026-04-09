@@ -220,6 +220,11 @@ class BaseTreeView(QtWidgets.QTreeWidget):
         self.select_all_action.setShortcut(QtGui.QKeySequence(_("Ctrl+A")))
         self.doubleClicked.connect(self.activate_item)
         self.setUniformRowHeights(True)
+        # Increase row height for better readability and spacing
+        self.setStyleSheet(
+            "QTreeWidget::item { padding: 3px 0px; }"
+        )
+        self.setIndentation(16)
 
         self.icon_plugins = icontheme.lookup('applications-system', icontheme.ICON_SIZE_MENU)
 

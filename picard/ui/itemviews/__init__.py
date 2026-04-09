@@ -177,7 +177,8 @@ class MainPanel(QtWidgets.QSplitter):
             header.setStyleSheet(
                 "QLabel#pane_header {"
                 "  font-weight: bold;"
-                "  padding: 4px 8px;"
+                "  font-size: 11pt;"
+                "  padding: 6px 12px;"
                 "  background-color: palette(alternate-base);"
                 "  border-bottom: 1px solid palette(mid);"
                 "}"
