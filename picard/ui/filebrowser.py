@@ -68,6 +68,10 @@ class FileBrowser(QtWidgets.QTreeView):
         self.set_as_starting_directory_action = QtGui.QAction(_("&Set as starting directory"), self)
         self.set_as_starting_directory_action.triggered.connect(self.set_as_starting_directory)
         self.addAction(self.set_as_starting_directory_action)
+        self.delete_action = QtGui.QAction(_("Move to &Trash"), self)
+        self.delete_action.setShortcut(QtGui.QKeySequence.StandardKey.Delete)
+        self.delete_action.triggered.connect(self.delete_selected_files)
+        self.addAction(self.delete_action)
         self.doubleClicked.connect(self.load_file_for_item)
         self.focused = False
         self.tagger.format_registry.formats_changed.connect(self._update_name_filters)
@@ -83,6 +87,8 @@ class FileBrowser(QtWidgets.QTreeView):
         menu.addAction(self.move_files_here_action)
         menu.addAction(self.toggle_hidden_action)
         menu.addAction(self.set_as_starting_directory_action)
+        menu.addSeparator()
+        menu.addAction(self.delete_action)
         menu.exec(event.globalPos())
         event.accept()
 
@@ -239,3 +245,30 @@ class FileBrowser(QtWidgets.QTreeView):
             config = get_config()
             path = self.model().filePath(indexes[0])
             config.setting['starting_directory_path'] = self._get_destination_from_path(path)
+
+    def delete_selected_files(self):
+        indexes = self.selectedIndexes()
+        if not indexes:
+            return
+        model = self.model()
+        paths = []
+        for index in indexes:
+            path = model.filePath(index)
+            if path and not model.isDir(index):
+                paths.append(path)
+        if not paths:
+            return
+        count = len(paths)
+        if count == 1:
+            msg = _("Are you sure you want to move this file to trash?\n\n%s") % paths[0]
+        else:
+            msg = _("Are you sure you want to move %d files to trash?") % count
+        reply = QtWidgets.QMessageBox.question(
+            self, _("Move to Trash"), msg,
+            QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
+            QtWidgets.QMessageBox.StandardButton.No,
+        )
+        if reply != QtWidgets.QMessageBox.StandardButton.Yes:
+            return
+        for path in paths:
+            QtCore.QFile.moveToTrash(path)
