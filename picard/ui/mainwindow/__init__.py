@@ -286,6 +286,11 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
         self.log_dialog = LogView(self)
         self.history_dialog = HistoryView(self)
 
+        # Font zoom shortcuts
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+="), self, self.zoom_in)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl++"), self, self.zoom_in)
+        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+-"), self, self.zoom_out)
+
         self.metadata_box = MetadataBox(parent=self)
         self.cover_art_box = CoverArtBox(parent=self)
         metadata_view_layout = QtWidgets.QHBoxLayout()
@@ -1963,6 +1968,17 @@ class MainWindow(QtWidgets.QMainWindow, PreserveGeometry):
 
     def identify(self):
         self.tagger.identify(self.selected_objects)
+
+    def zoom_in(self):
+        font = self.tagger.font()
+        font.setPointSize(font.pointSize() + 1)
+        self.tagger.setFont(font)
+
+    def zoom_out(self):
+        font = self.tagger.font()
+        new_size = max(6, font.pointSize() - 1)
+        font.setPointSize(new_size)
+        self.tagger.setFont(font)
 
     def copy_files(self, objects):
         mimeData = QtCore.QMimeData()
