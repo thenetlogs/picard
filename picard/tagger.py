@@ -465,9 +465,7 @@ class Tagger(QtWidgets.QApplication):
     def _init_ui(self, config):
         """Initialize User Interface / Main Window"""
         # Set application font
-        font_family = config.setting.get('ui_font_family', 'JetBrains Mono')
-        font_size = config.setting.get('ui_font_size', 10)
-        font = QtGui.QFont(font_family, font_size)
+        font = QtGui.QFont('JetBrains Mono', 10)
         self.setFont(font)
 
         self.enable_menu_icons(config.setting['show_menu_icons'])
