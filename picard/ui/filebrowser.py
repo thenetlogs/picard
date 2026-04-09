@@ -68,7 +68,7 @@ class FileBrowser(QtWidgets.QTreeView):
         self.set_as_starting_directory_action = QtGui.QAction(_("&Set as starting directory"), self)
         self.set_as_starting_directory_action.triggered.connect(self.set_as_starting_directory)
         self.addAction(self.set_as_starting_directory_action)
-        self.delete_action = QtGui.QAction(_("Move to &Trash"), self)
+        self.delete_action = QtGui.QAction(_("&Delete"), self)
         self.delete_action.setShortcut(QtGui.QKeySequence.StandardKey.Delete)
         self.delete_action.triggered.connect(self.delete_selected_files)
         self.addAction(self.delete_action)
@@ -260,15 +260,21 @@ class FileBrowser(QtWidgets.QTreeView):
             return
         count = len(paths)
         if count == 1:
-            msg = _("Are you sure you want to move this file to trash?\n\n%s") % paths[0]
+            msg = _("Permanently delete this file?\n\n%s") % paths[0]
         else:
-            msg = _("Are you sure you want to move %d files to trash?") % count
-        reply = QtWidgets.QMessageBox.question(
-            self, _("Move to Trash"), msg,
+            msg = _("Permanently delete %d files?") % count
+        reply = QtWidgets.QMessageBox.warning(
+            self, _("Delete Files"), msg,
             QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
             QtWidgets.QMessageBox.StandardButton.No,
         )
         if reply != QtWidgets.QMessageBox.StandardButton.Yes:
             return
         for path in paths:
-            QtCore.QFile.moveToTrash(path)
+            # Try trash first, fall back to permanent delete
+            success, _ = QtCore.QFile.moveToTrash(path)
+            if not success:
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
