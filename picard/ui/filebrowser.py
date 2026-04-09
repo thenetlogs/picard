@@ -252,17 +252,20 @@ class FileBrowser(QtWidgets.QTreeView):
             return
         model = self.model()
         paths = []
+        is_dir = []
         for index in indexes:
             path = model.filePath(index)
-            if path and not model.isDir(index):
+            if path:
                 paths.append(path)
+                is_dir.append(model.isDir(index))
         if not paths:
             return
         count = len(paths)
         if count == 1:
-            msg = _("Permanently delete this file?\n\n%s") % paths[0]
+            kind = _("folder") if is_dir[0] else _("file")
+            msg = _("Permanently delete this %s?\n\n%s") % (kind, paths[0])
         else:
-            msg = _("Permanently delete %d files?") % count
+            msg = _("Permanently delete %d items?") % count
         reply = QtWidgets.QMessageBox.warning(
             self, _("Delete Files"), msg,
             QtWidgets.QMessageBox.StandardButton.Yes | QtWidgets.QMessageBox.StandardButton.No,
@@ -270,11 +273,15 @@ class FileBrowser(QtWidgets.QTreeView):
         )
         if reply != QtWidgets.QMessageBox.StandardButton.Yes:
             return
-        for path in paths:
+        import shutil
+        for i, path in enumerate(paths):
             # Try trash first, fall back to permanent delete
-            success, _ = QtCore.QFile.moveToTrash(path)
+            success, _new_path = QtCore.QFile.moveToTrash(path)
             if not success:
                 try:
-                    os.remove(path)
+                    if is_dir[i]:
+                        shutil.rmtree(path)
+                    else:
+                        os.remove(path)
                 except OSError:
                     pass
